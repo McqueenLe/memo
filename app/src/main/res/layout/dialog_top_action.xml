@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:gravity="center_vertical"
+    android:paddingLeft="20dp"
+    android:paddingRight="20dp"
+    android:background="@drawable/shape_bg_grey">
+
+    <TextView
+        android:id="@+id/tvCancel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/shape_round_corner_grey_3dp"
+        android:gravity="center"
+        android:textColor="@color/text1"
+        android:textSize="@dimen/text_size_mediumx"
+        android:layout_alignParentLeft="true"
+        android:padding="6dp"
+        android:text="取消"/>
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:textColor="@color/text1"
+        android:textSize="@dimen/text_size_mediumx"
+        android:layout_centerHorizontal="true"
+        android:gravity="center"
+        android:padding="10dp"
+        tools:text="已选择8项"/>
+
+    <TextView
+        android:id="@+id/tvAll"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@drawable/shape_round_corner_grey_3dp"
+        android:textColor="@color/text1"
+        android:textSize="@dimen/text_size_mediumx"
+        android:gravity="center"
+        android:layout_alignParentRight="true"
+        android:padding="6dp"
+        android:text="全选"/>
+</LinearLayout>

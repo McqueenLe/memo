@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="15dp"
+    android:background="@drawable/selector_item_bg">
+
+    <ImageView
+        android:id="@+id/ivTagsIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        tools:background="@drawable/ic_note_taking"/>
+
+    <TextView
+        android:id="@+id/tvTagsName"
+        android:layout_width="0dp"
+        android:layout_weight="1"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="20dp"
+        android:textColor="@color/text1"
+        android:textSize="@dimen/text_size_mediumx"
+        tools:text="废纸篓"/>
+
+    <TextView
+        android:id="@+id/tvTagsDetail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawableRight="@drawable/ic_right_back_pressed"/>
+
+</LinearLayout>

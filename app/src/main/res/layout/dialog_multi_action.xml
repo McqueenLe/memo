@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal" android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center"
+    android:paddingTop="10dp"
+    android:paddingBottom="7dp"
+    android:background="@drawable/shape_bg_grey">
+
+    <TextView
+        android:id="@+id/tvTop"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:drawableTop="@drawable/ic_to_top"
+        android:drawablePadding="5dp"
+        android:textSize="@dimen/text_size_small"
+        android:gravity="center"
+        android:textColor="@color/text1"
+        android:text="置顶"/>
+
+    <TextView
+        android:id="@+id/tvDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:drawableTop="@drawable/ic_delete"
+        android:drawablePadding="5dp"
+        android:gravity="center"
+        android:textSize="@dimen/text_size_small"
+        android:textColor="@color/text1"
+        android:text="删除"/>
+
+    <TextView
+        android:id="@+id/tvMove"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:drawableTop="@drawable/ic_move"
+        android:drawablePadding="5dp"
+        android:gravity="center"
+        android:textSize="@dimen/text_size_small"
+        android:textColor="@color/text1"
+        android:text="移动到"/>
+</LinearLayout>

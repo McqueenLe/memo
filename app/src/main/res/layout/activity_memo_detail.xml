@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <com.xy.memo.view.TitleBar
+        android:id="@+id/titlebar_memo_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
+
+    <com.xy.memo.view.PictureAndTextEditorView
+        android:id="@+id/etContent_memo_detail"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        style="@android:style/Widget.TextView"
+        android:padding="30dp"
+        android:layout_below="@+id/titlebar_memo_detail"
+        android:layout_above="@+id/bottomActionView"
+        android:textColor="@color/text2"
+        android:textSize="@dimen/text_size_mediumx"
+        android:lineSpacingMultiplier="1.5"
+        android:background="@null"
+        android:gravity="top"
+        tools:text="今天玩的特别开心"/>
+
+    <com.xy.memo.view.BottomActionView
+        android:id="@+id/bottomActionView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:scrollbars="vertical"/>
+</RelativeLayout>
