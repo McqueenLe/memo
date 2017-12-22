@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CheckedTextView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -16,11 +17,15 @@ import com.xy.memo.R;
 import com.xy.memo.activity.MemoDetailActivity;
 import com.xy.memo.base.RVBaseCell;
 import com.xy.memo.base.RVBaseViewHolder;
+import com.xy.memo.eventbus.EventBusEvent;
 import com.xy.memo.model.MemoInfo;
 import com.xy.memo.model.MemoType;
 import com.xy.memo.utils.BitmapUtil;
 import com.xy.memo.utils.DateUtil;
+import com.xy.memo.utils.EventBusUtils;
 import com.xy.memo.view.PictureAndTextEditorView;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
 
@@ -48,14 +53,15 @@ public class MemoMultiVerticalCell extends RVBaseCell<MemoInfo> {
     }
 
     @Override
-    public void onBindViewHolder(RVBaseViewHolder holder, int position) {
+    public void onBindViewHolder(final RVBaseViewHolder holder, int position) {
         final MemoInfo memoInfo = mData;
         TextView tvTitle = (TextView) holder.getView(R.id.tv_memo_title);
         TextView tvContent = (TextView) holder.getView(R.id.tv_memo_content);
         TextView tvTime = (TextView) holder.getView(R.id.tv_memo_time);
         ImageView ivVertical = (ImageView) holder.getView(R.id.ivVertical);
+        final CheckedTextView cbSelected = (CheckedTextView) holder.getView(R.id.cbSelected);
 
-        tvTime.setText(DateUtil.formatTime(memoInfo.insertTime, "yyyy年MM月dd日 晚上hh:mm"));
+        tvTime.setText(DateUtil.formatTime(memoInfo.insertTime, "yyyy年MM月dd日"));
         String firstImgPah = "";
         String firstLineText = "";
         String[] contents = memoInfo.memoContent.replace("\n", "").split(PictureAndTextEditorView.mBitmapTag);
@@ -80,15 +86,60 @@ public class MemoMultiVerticalCell extends RVBaseCell<MemoInfo> {
             tvTitle.setText(firstLineText);
             tvContent.setText(firstLineText);
         }
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+        // 是否为多选模式
+        if(memoInfo.isMultiMode) {
+            cbSelected.setVisibility(View.VISIBLE);
+            cbSelected.setChecked(memoInfo.isChecked);
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    cbSelected.toggle();
+                    if(cbSelected.isChecked()) {
+                        mData.isChecked = true;
+                        holder.itemView.setSelected(true);
+                    } else {
+                        mData.isChecked = false;
+                        holder.itemView.setSelected(false);
+                    }
+                    EventBusEvent eventBusEvent = new EventBusEvent(EventBusUtils.EventCode.EVENT_CHECK_STATE_CHANGE);
+                    EventBus.getDefault().post(eventBusEvent);
+                }
+            });
+        } else {
+            cbSelected.setVisibility(View.GONE);
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Intent intent = new Intent(mContext, MemoDetailActivity.class);
+                    Bundle bundle = new Bundle();
+                    bundle.putSerializable("MemoInfo", memoInfo);
+                    intent.putExtras(bundle);
+                    mContext.startActivity(intent);
+                }
+            });
+        }
+        holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(mContext, MemoDetailActivity.class);
-                Bundle bundle = new Bundle();
-                bundle.putSerializable("Memoinfo", memoInfo);
-                intent.putExtras(bundle);
-                mContext.startActivity(intent);
+            public boolean onLongClick(View view) {
+                cbSelected.setVisibility(View.VISIBLE);
+                mData.isChecked = true;
+                holder.itemView.setSelected(true);
+                // 更新主界面UI
+                EventBusEvent eventBusEvent = new EventBusEvent(EventBusUtils.EventCode.EVENT_SET_MULTI_CHOICE);
+                EventBus.getDefault().post(eventBusEvent);
+                return true;
             }
         });
+
+//        holder.itemView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                Intent intent = new Intent(mContext, MemoDetailActivity.class);
+//                Bundle bundle = new Bundle();
+//                bundle.putSerializable("Memoinfo", memoInfo);
+//                intent.putExtras(bundle);
+//                mContext.startActivity(intent);
+//            }
+//        });
     }
 }

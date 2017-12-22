@@ -1,27 +1,36 @@
 package com.xy.memo.base;
 
+import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 import android.view.ViewGroup;
 
+import com.xy.memo.helper.ItemTouchHelperAdapter;
+import com.xy.memo.helper.OnStartDragListener;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public   abstract class RVBaseAdapter<C extends RVBaseCell>  extends RecyclerView.Adapter<RVBaseViewHolder>{
-    public static final String TAG = "RVBaseAdapter";
-    protected List<C> mData;
+/**
+ * recyclerview的adapter抽象基类
+ * @param <C>
+ */
+public  abstract class RVBaseAdapter<C extends RVBaseCell>  extends RecyclerView.Adapter<RVBaseViewHolder> implements ItemTouchHelperAdapter {
+    public static final String TAG = RVBaseAdapter.class.getSimpleName();
+    private OnStartDragListener mDragStartListener; // 拖拽监听
+    protected List<C> mData = new ArrayList<>();; // 数据集合
+    private boolean mCanDrag = false;
 
     public RVBaseAdapter(){
-        mData = new ArrayList<>();
+
     }
 
-    public void setData(List<C> data) {
-        addAll(data);
+    public void setDragable(boolean canDrag) {
+        this.mCanDrag = canDrag;
         notifyDataSetChanged();
-    }
-
-    public List<C> getData() {
-        return mData;
     }
 
     @Override
@@ -31,13 +40,21 @@ public   abstract class RVBaseAdapter<C extends RVBaseCell>  extends RecyclerVie
                 return mData.get(i).onCreateViewHolder(parent,viewType);
             }
         }
-
         throw new RuntimeException("wrong viewType");
     }
 
     @Override
-    public void onBindViewHolder(RVBaseViewHolder holder, int position) {
+    public void onBindViewHolder(final RVBaseViewHolder holder, int position) {
         mData.get(position).onBindViewHolder(holder,position);
+        holder.itemView.setOnTouchListener(new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (mCanDrag && event.getAction() == MotionEvent.ACTION_DOWN && null != mDragStartListener) {
+                    mDragStartListener.onStartDrag(holder);
+                }
+                return false; // onTouch事件中：down事件返回值标记此次事件是否为点击事件（返回false，是点击事件；返回true，不记为点击事件）
+            }
+        });
     }
 
     @Override
@@ -64,24 +81,65 @@ public   abstract class RVBaseAdapter<C extends RVBaseCell>  extends RecyclerVie
         return mData.get(position).getItemType();
     }
 
+    @Override
+    public boolean onItemMove(int fromPosition, int toPosition) {
+        Collections.swap(mData, fromPosition, toPosition);
+        notifyItemMoved(fromPosition, toPosition);
+        return true;
+    }
+
+    @Override
+    public void onItemDismiss(int position) {
+        mData.remove(position);
+        notifyItemRemoved(position);
+    }
+
     /**
-     * add one cell
+     * 设置拖拽监听
+     * @param dragListener
+     */
+    public void setDragListener(OnStartDragListener dragListener) {
+        this.mDragStartListener = dragListener;
+    }
+
+    /**
+     * 设置list数据
+     * @param data
+     */
+    public void setData(List<C> data) {
+        addAll(data);
+        notifyDataSetChanged();
+    }
+
+    /**
+     * 获取List数据
+     * @return
+     */
+    public List<C> getData() {
+        return mData;
+    }
+
+    /**
+     * 添加单个数据
      * @param cell
      */
     public void add(C cell){
          mData.add(cell);
-         int index = mData.indexOf(cell);
          notifyDataSetChanged();
-//         notifyItemChanged(index);
     }
 
+    /**
+     * 添加数据到指定位置
+     * @param index
+     * @param cell
+     */
     public void add(int index,C cell){
         mData.add(index,cell);
         notifyItemChanged(index);
     }
 
     /**
-     * remove a cell
+     * 移除单个数据
      * @param cell
      */
     public void remove(C cell){
@@ -89,31 +147,30 @@ public   abstract class RVBaseAdapter<C extends RVBaseCell>  extends RecyclerVie
         remove(indexOfCell);
     }
 
+    /**
+     * 移除指定位置上的数据
+     * @param index
+     */
     public void remove(int index){
         mData.remove(index);
         notifyItemRemoved(index);
     }
 
     /**
-     *
+     * 从指定位置开始，移除指定个数的数据
      * @param start
      * @param count
      */
     public void remove(int start,int count){
-        if((start +count) > mData.size()){
+        if((start + count) > mData.size()){
             return;
         }
-
         mData.subList(start,start+count).clear();
-
         notifyItemRangeRemoved(start,count);
     }
 
-
-
-
     /**
-     * add a cell list
+     * 添加list数据
      * @param cells
      */
     public void addAll(List<C> cells){
@@ -125,6 +182,11 @@ public   abstract class RVBaseAdapter<C extends RVBaseCell>  extends RecyclerVie
         notifyItemRangeChanged(mData.size()-cells.size(),mData.size());
     }
 
+    /**
+     * 从指定位置添加list数据
+     * @param index
+     * @param cells
+     */
     public void addAll(int index,List<C> cells){
         if(cells == null || cells.size() == 0){
             return;
@@ -133,6 +195,9 @@ public   abstract class RVBaseAdapter<C extends RVBaseCell>  extends RecyclerVie
         notifyItemRangeChanged(index,index+cells.size());
     }
 
+    /**
+     * 清除数据
+     */
     public void clear(){
         mData.clear();
         notifyDataSetChanged();

@@ -16,6 +16,7 @@ import com.xy.memo.base.Cell;
 import com.xy.memo.base.RVSimpleAdapter;
 import com.xy.memo.cell.CameraCell;
 import com.xy.memo.cell.ImgCell;
+import com.xy.memo.helper.OnStartDragListener;
 import com.xy.memo.utils.ImgUtil;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import java.util.List;
  * @author xy 2017/11/30.
  */
 
-public class BottomActionView extends LinearLayout implements View.OnClickListener{
+public class BottomActionView extends LinearLayout implements View.OnClickListener, OnStartDragListener {
     private Context mContext;
     private RecyclerView recyclerViewImg;
     private ActionListener actionListener;
@@ -164,6 +165,11 @@ public class BottomActionView extends LinearLayout implements View.OnClickListen
         } else {
             recyclerViewImg.setVisibility(GONE);
         }
+    }
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+
     }
 
     public interface ActionListener {

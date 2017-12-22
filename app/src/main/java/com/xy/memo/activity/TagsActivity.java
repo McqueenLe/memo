@@ -26,6 +26,7 @@ import com.xy.memo.base.RVSimpleAdapter;
 import com.xy.memo.cell.TagInfo;
 import com.xy.memo.cell.TagsCell;
 import com.xy.memo.db.MemoDao;
+import com.xy.memo.helper.OnStartDragListener;
 import com.xy.memo.model.BaseItemDecoration;
 import com.xy.memo.model.MemoInfo;
 import com.xy.memo.utils.SharedPreferencesInfo;
@@ -38,7 +39,7 @@ import java.util.List;
  * @author xy 2017/12/4.
  */
 
-public class TagsActivity extends BasicActivity {
+public class TagsActivity extends BasicActivity implements OnStartDragListener{
     private Context mContext;
     private TitleBar mTitleBar;
     private FloatingActionButton fabAddTag;
@@ -137,4 +138,8 @@ public class TagsActivity extends BasicActivity {
     }
 
 
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+
+    }
 }

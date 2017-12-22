@@ -9,6 +9,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.StaggeredGridLayoutManager;
 import android.support.v7.widget.Toolbar;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.TextUtils;
 import android.view.MenuItem;
 import android.view.View;
@@ -24,6 +25,8 @@ import com.xy.memo.cell.MemoMultiVerticalCell;
 import com.xy.memo.cell.TagInfo;
 import com.xy.memo.db.MemoDao;
 import com.xy.memo.eventbus.EventBusEvent;
+import com.xy.memo.helper.OnStartDragListener;
+import com.xy.memo.helper.SimpleItemTouchHelperCallback;
 import com.xy.memo.model.MemoInfo;
 import com.xy.memo.utils.EventBusUtils;
 import com.xy.memo.utils.SharedPreferencesInfo;
@@ -37,12 +40,13 @@ import org.greenrobot.eventbus.ThreadMode;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HomeActivity extends AppCompatActivity implements View.OnClickListener{
+public class HomeActivity extends AppCompatActivity implements View.OnClickListener,OnStartDragListener {
     private Context mContext;
     private RecyclerView mRecyclerview;
     private TopActionDialog topActionDialog;
     private BottomActionDialog bottomActionDialog;
     private RVSimpleAdapter rvSimpleAdapter;
+    private ItemTouchHelper mItemTouchHelper; // 处理置顶以及左右滑动
     private TextView tvSort;
     private List<MemoInfo> memoInfoList; // 便签数据
     private boolean isVertical = false; // 是否默认为纵向排版
@@ -96,6 +100,12 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         mRecyclerview = (RecyclerView) findViewById(R.id.recyclerview);
         mRecyclerview.setHasFixedSize(true);
         rvSimpleAdapter = new RVSimpleAdapter();
+        rvSimpleAdapter.setDragListener(this);
+        // 处理拖拽和侧滑操作
+        ItemTouchHelper.Callback callback = new SimpleItemTouchHelperCallback(rvSimpleAdapter);
+        mItemTouchHelper = new ItemTouchHelper(callback);
+        mItemTouchHelper.attachToRecyclerView(mRecyclerview);
+
         mRecyclerview.setAdapter(rvSimpleAdapter);
         boolean isVerticalLayout = SharedPreferencesInfo.getTagBoolean(mContext, SharedPreferencesInfo.IS_VERTICAL_LAYOUT, false);
         isVertical = isVerticalLayout;
@@ -339,5 +349,10 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             intent.addCategory(Intent.CATEGORY_HOME);
             startActivity(intent);
         }
+    }
+
+    @Override
+    public void onStartDrag(RecyclerView.ViewHolder viewHolder) {
+        mItemTouchHelper.startDrag(viewHolder);
     }
 }
