@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.xy.memo.R;
+import com.xy.memo.activity.GalleryActivity;
 import com.xy.memo.activity.MemoDetailActivity;
 import com.xy.memo.base.RVBaseCell;
 import com.xy.memo.base.RVBaseViewHolder;
@@ -28,6 +29,7 @@ import com.xy.memo.view.PictureAndTextEditorView;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * 纵向排版的文字加图片类型
@@ -90,7 +92,7 @@ public class MemoMultiVerticalCell extends RVBaseCell<MemoInfo> {
         if(memoInfo.isMultiMode) {
             cbSelected.setVisibility(View.VISIBLE);
             cbSelected.setChecked(memoInfo.isChecked);
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
+            holder.itemView.setOnClickListener(new View.OnClickListener() { // 多选模式下短按设置是否选中
                 @Override
                 public void onClick(View view) {
                     cbSelected.toggle();
@@ -106,10 +108,13 @@ public class MemoMultiVerticalCell extends RVBaseCell<MemoInfo> {
                 }
             });
         } else {
+            memoInfo.isChecked = false;
+            cbSelected.setChecked(false);
             cbSelected.setVisibility(View.GONE);
+            holder.itemView.setSelected(false);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
-                public void onClick(View view) {
+                public void onClick(View view) { // 非多选模式下短按查看详情
                     Intent intent = new Intent(mContext, MemoDetailActivity.class);
                     Bundle bundle = new Bundle();
                     bundle.putSerializable("MemoInfo", memoInfo);
@@ -120,17 +125,32 @@ public class MemoMultiVerticalCell extends RVBaseCell<MemoInfo> {
         }
         holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
             @Override
-            public boolean onLongClick(View view) {
+            public boolean onLongClick(View view) { // 长按进入多选模式
                 cbSelected.setVisibility(View.VISIBLE);
                 mData.isChecked = true;
                 holder.itemView.setSelected(true);
+
                 // 更新主界面UI
                 EventBusEvent eventBusEvent = new EventBusEvent(EventBusUtils.EventCode.EVENT_SET_MULTI_CHOICE);
                 EventBus.getDefault().post(eventBusEvent);
                 return true;
             }
         });
-
+        ivVertical.setOnClickListener(new View.OnClickListener() { // 跳转到图集页面
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(mContext, GalleryActivity.class);
+                ArrayList<String> pathList = new ArrayList<>();
+                String[] contents = memoInfo.memoContent.replace("\n", "").trim().split(PictureAndTextEditorView.mBitmapTag);
+                for(int i=0; i<contents.length; i++) {
+                    if(new File(contents[i]).exists()) {
+                        pathList.add(contents[i]);
+                    }
+                }
+                intent.putStringArrayListExtra("PathList", pathList);
+                mContext.startActivity(intent);
+            }
+        });
 //        holder.itemView.setOnClickListener(new View.OnClickListener() {
 //            @Override
 //            public void onClick(View view) {

@@ -1,8 +1,10 @@
 package com.xy.memo.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.design.widget.FloatingActionButton;
@@ -85,6 +87,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     /**
      * 初始化布局
      */
+    @SuppressLint("NewApi")
     private void initLayout() {
         // 设置toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
@@ -99,6 +102,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
 
         mRecyclerview = (RecyclerView) findViewById(R.id.recyclerview);
         mRecyclerview.setHasFixedSize(true);
+        mRecyclerview.setItemAnimator(new DefaultItemAnimator());
         rvSimpleAdapter = new RVSimpleAdapter();
         rvSimpleAdapter.setDragListener(this);
         // 处理拖拽和侧滑操作
@@ -107,9 +111,8 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
         mItemTouchHelper.attachToRecyclerView(mRecyclerview);
 
         mRecyclerview.setAdapter(rvSimpleAdapter);
-        boolean isVerticalLayout = SharedPreferencesInfo.getTagBoolean(mContext, SharedPreferencesInfo.IS_VERTICAL_LAYOUT, false);
-        isVertical = isVerticalLayout;
-        if(isVerticalLayout) {
+        isVertical = SharedPreferencesInfo.getTagBoolean(mContext, SharedPreferencesInfo.IS_VERTICAL_LAYOUT, false);
+        if(isVertical) {
             tvSort.setBackgroundResource(R.drawable.selector_home_sort_grid);
         } else {
             tvSort.setBackgroundResource(R.drawable.selector_home_sort_row);
@@ -164,21 +167,39 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 // 点击移动到
             }
         });
-        bottomActionDialog.setTopListener(new View.OnClickListener() {
+        bottomActionDialog.setTopListener(new View.OnClickListener() { // 点击置顶
             @Override
             public void onClick(View view) {
-                // 点击置顶
+                // 获取已选择的数据
                 List<MemoInfo> list = getSelected();
-                if(list.size() <= 0) {
+                if(list.size() == 0) {
                     return;
                 }
-                List<Cell> cells = new ArrayList<>();
                 RVBaseCell cell;
+                // 先移除当前位置，再将数据移动到第一个位置
                 for(MemoInfo info : list) {
-                    cell = new MemoMultiCell(mContext, info);
-                    cells.add(cell);
+                    memoInfoList.remove(info);
+                    memoInfoList.add(0, info);
                 }
-                rvSimpleAdapter.addAll(0, cells);
+                rvSimpleAdapter.clear();
+                // 根据recyclerview的布局类型来加载itemView
+                if(isVertical) {
+                    for(MemoInfo memoInfo : memoInfoList) {
+                        cell = new MemoMultiVerticalCell(mContext, memoInfo);
+                        rvSimpleAdapter.add(cell);
+                    }
+                } else {
+                    for(MemoInfo memoInfo : memoInfoList) {
+                        cell = new MemoMultiCell(mContext, memoInfo);
+                        rvSimpleAdapter.add(cell);
+                    }
+                }
+                // 退出多选状态
+                setMode(false);
+                // 置顶后移动到最顶端
+                mRecyclerview.scrollToPosition(0);
+                // 数据变更时触发item的加载动画
+                rvSimpleAdapter.runLayoutAnimation(mRecyclerview);
             }
         });
     }
@@ -214,7 +235,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case android.R.id.home:
+            case android.R.id.home: // 进入标签管理界面
                 Intent intent = new Intent(mContext, TagsActivity.class);
                 startActivity(intent);
                 break;
@@ -232,6 +253,7 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                 if(rvSimpleAdapter.getItemCount() == 0) {
                     return;
                 }
+                // 根据布局类型来设置背景
                 if(isVertical) {
                     isVertical = false;
                     tvSort.setBackgroundResource(R.drawable.selector_home_sort_row);
@@ -239,8 +261,12 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
                     isVertical = true;
                     tvSort.setBackgroundResource(R.drawable.selector_home_sort_grid);
                 }
+                // 保存布局类型，方便下次加载
                 SharedPreferencesInfo.saveTagBoolean(mContext, SharedPreferencesInfo.IS_VERTICAL_LAYOUT, isVertical);
+                // 获取便签列表
                 getMemoList(isVertical);
+                // 数据变更触发加载动画
+                rvSimpleAdapter.runLayoutAnimation(mRecyclerview);
                 break;
 
             case R.id.fab: // 点击添加
@@ -300,12 +326,6 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
      * @param isMulti
      */
     private void setMode(boolean isMulti) {
-        if(null != memoInfoList && memoInfoList.size() > 0) {
-            for(MemoInfo info : memoInfoList) {
-                info.isMultiMode = isMulti;
-            }
-            rvSimpleAdapter.notifyDataSetChanged();
-        }
         if(isMulti) {
             topActionDialog.showMenu();
             bottomActionDialog.showMenu();
@@ -313,6 +333,13 @@ public class HomeActivity extends AppCompatActivity implements View.OnClickListe
             topActionDialog.dismiss();
             bottomActionDialog.dismiss();
         }
+        if(null == memoInfoList || memoInfoList.size() == 0) {
+            return;
+        }
+        for(MemoInfo info : memoInfoList) {
+            info.isMultiMode = isMulti;
+        }
+        rvSimpleAdapter.notifyDataSetChanged();
     }
 
     /**

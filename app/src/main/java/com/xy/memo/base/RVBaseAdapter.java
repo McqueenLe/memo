@@ -1,12 +1,16 @@
 package com.xy.memo.base;
 
+import android.content.Context;
 import android.support.v4.view.MotionEventCompat;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LayoutAnimationController;
 
+import com.xy.memo.R;
 import com.xy.memo.helper.ItemTouchHelperAdapter;
 import com.xy.memo.helper.OnStartDragListener;
 
@@ -125,7 +129,8 @@ public  abstract class RVBaseAdapter<C extends RVBaseCell>  extends RecyclerView
      */
     public void add(C cell){
          mData.add(cell);
-         notifyDataSetChanged();
+         notifyItemRangeChanged(0, mData.size()-1);
+//         notifyDataSetChanged();
     }
 
     /**
@@ -203,6 +208,19 @@ public  abstract class RVBaseAdapter<C extends RVBaseCell>  extends RecyclerView
         notifyDataSetChanged();
     }
 
+    /**
+     * 数据变化时触发动画
+     * @param recyclerView
+     */
+    public void runLayoutAnimation(final RecyclerView recyclerView) {
+        final Context context = recyclerView.getContext();
+        final LayoutAnimationController controller =
+                AnimationUtils.loadLayoutAnimation(context, R.anim.layout_anim_fall_down);
+
+        recyclerView.setLayoutAnimation(controller);
+        recyclerView.getAdapter().notifyDataSetChanged();
+        recyclerView.scheduleLayoutAnimation();
+    }
 
     /**
      * 如果子类需要在onBindViewHolder 回调的时候做的操作可以在这个方法里做

@@ -5,7 +5,9 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.text.Spanned;
 import android.text.TextUtils;
+import android.text.style.ImageSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.xy.memo.R;
+import com.xy.memo.activity.GalleryActivity;
 import com.xy.memo.activity.MemoDetailActivity;
 import com.xy.memo.base.RVBaseCell;
 import com.xy.memo.base.RVBaseViewHolder;
@@ -27,6 +30,7 @@ import com.xy.memo.view.PictureAndTextEditorView;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.File;
+import java.util.ArrayList;
 
 /**
  * 图文memo
@@ -112,7 +116,10 @@ public class MemoMultiCell extends RVBaseCell<MemoInfo> {
                 }
             });
         } else {
+            memoInfo.isChecked = false;
+            cbSelected.setChecked(false);
             cbSelected.setVisibility(View.GONE);
+            holder.itemView.setSelected(false);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -130,10 +137,26 @@ public class MemoMultiCell extends RVBaseCell<MemoInfo> {
                 cbSelected.setVisibility(View.VISIBLE);
                 mData.isChecked = true;
                 holder.itemView.setSelected(true);
+
                 // 更新主界面UI
                 EventBusEvent eventBusEvent = new EventBusEvent(EventBusUtils.EventCode.EVENT_SET_MULTI_CHOICE);
                 EventBus.getDefault().post(eventBusEvent);
                 return true;
+            }
+        });
+        ivRightImg.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(mContext, GalleryActivity.class);
+                ArrayList<String> pathList = new ArrayList<>();
+                String[] contents = memoInfo.memoContent.replace("\n", "").trim().split(PictureAndTextEditorView.mBitmapTag);
+                for(int i=0; i<contents.length; i++) {
+                    if(new File(contents[i]).exists()) {
+                        pathList.add(contents[i]);
+                    }
+                }
+                intent.putStringArrayListExtra("PathList", pathList);
+                mContext.startActivity(intent);
             }
         });
     }

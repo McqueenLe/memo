@@ -101,7 +101,7 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
         // We only want the active item to change
         if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
             // 高亮显示
-            viewHolder.itemView.setBackgroundColor(Color.LTGRAY);
+//            viewHolder.itemView.setBackgroundColor(Color.LTGRAY);
             if (viewHolder instanceof ItemTouchHelperViewHolder) {
                 // Let the view holder know that this item is being moved or dragged
                 ItemTouchHelperViewHolder itemViewHolder = (ItemTouchHelperViewHolder) viewHolder;
@@ -116,7 +116,7 @@ public class SimpleItemTouchHelperCallback extends ItemTouchHelper.Callback {
     public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
         super.clearView(recyclerView, viewHolder);
         // 恢复平常显示
-        viewHolder.itemView.setBackgroundColor(Color.WHITE);
+//        viewHolder.itemView.setBackgroundColor(Color.WHITE);
         viewHolder.itemView.setAlpha(ALPHA_FULL);
         if (viewHolder instanceof ItemTouchHelperViewHolder) {
             // Tell the view holder it's time to restore the idle state
